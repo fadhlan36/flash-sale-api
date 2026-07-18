@@ -44,7 +44,7 @@ app
 Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/flash-sale-api.git
+git clone https://github.com/fadhlan36/flash-sale-api.git
 cd flash-sale-api
 ```
 
