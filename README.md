@@ -1,17 +1,19 @@
 # Flash Sale API
 
-A RESTful API built with Laravel 12 to simulate an online store flash sale. This project ensures inventory consistency during concurrent purchase requests by using database transactions and row-level locking.
+A RESTful API built with **Laravel 12** to simulate an online store flash sale. The application prevents overselling by handling concurrent purchase requests using **database transactions** and **pessimistic locking (`lockForUpdate()`)**, ensuring inventory never becomes negative.
+
+---
 
 ## Features
 
 - RESTful API with JSON responses
-- Product listing and detail endpoints
+- Product listing and product detail endpoints
 - Order checkout endpoint
-- Prevents negative inventory
-- Handles race conditions during flash sales
+- Inventory protection against overselling
+- Race condition handling during flash sales
 - Functional command-line concurrency test
 - MySQL database
-- Laravel Service Layer architecture
+- Service Layer architecture
 
 ---
 
@@ -26,7 +28,7 @@ A RESTful API built with Laravel 12 to simulate an online store flash sale. This
 
 ## Project Structure
 
-```
+```text
 app
 ├── Console
 │   └── Commands
@@ -39,60 +41,80 @@ app
 
 ---
 
+## Requirements
+
+- PHP >= 8.2
+- Composer
+- MySQL 8.0+
+
+---
+
 ## Installation
 
-Clone the repository
+Clone the repository.
 
 ```bash
 git clone https://github.com/fadhlan36/flash-sale-api.git
 cd flash-sale-api
 ```
 
-Install dependencies
+Install project dependencies.
 
 ```bash
 composer install
 ```
 
-Copy environment file
+Copy the environment file.
 
 ```bash
 cp .env.example .env
 ```
 
-Generate application key
+Generate the application key.
 
 ```bash
 php artisan key:generate
 ```
 
-Configure your database in the `.env` file.
+Create a MySQL database (e.g. `flash_sale`), then import the SQL file located at:
 
-Run database migration (or import the provided SQL schema if applicable).
-
-Seed sample data
-
-```bash
-php artisan db:seed
+```text
+database/sql/flash_sale.sql
 ```
 
-Start the development server
+Update your database credentials in the `.env` file.
+
+Start the development server.
 
 ```bash
 php artisan serve
 ```
 
+> **Note**
+>
+> The provided SQL file already contains the required database schema and sample product data. No additional migration or seeding is required.
+
 ---
 
-## API Endpoints
+## Available Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products` | Retrieve all products |
+| GET | `/api/products/{id}` | Retrieve product details |
+| POST | `/api/orders` | Create a new order |
+
+---
+
+## API Examples
 
 ### Get All Products
 
-```
+```http
 GET /api/products
 ```
 
-Response
+**Response**
 
 ```json
 {
@@ -112,19 +134,19 @@ Response
 
 ### Get Product Detail
 
-```
-GET /api/products/{id}
+```http
+GET /api/products/1
 ```
 
 ---
 
 ### Create Order
 
-```
+```http
 POST /api/orders
 ```
 
-Request Body
+**Request Body**
 
 ```json
 {
@@ -137,7 +159,7 @@ Request Body
 }
 ```
 
-Successful Response
+**Successful Response**
 
 ```json
 {
@@ -150,29 +172,37 @@ Successful Response
 }
 ```
 
+**Error Response**
+
+```json
+{
+    "message": "Insufficient stock for Mechanical Keyboard"
+}
+```
+
 ---
 
 ## Race Condition Handling
 
-This project prevents overselling during flash sales by using:
+To prevent overselling during flash sales, the checkout process uses:
 
-- Database Transactions
-- `lockForUpdate()` row locking
+- Database transactions
+- Pessimistic locking with `lockForUpdate()`
 - Atomic inventory updates
 
-Even when multiple users purchase the same product simultaneously, inventory will never become negative.
+This ensures that multiple concurrent requests cannot reduce product inventory below zero.
 
 ---
 
 ## Functional Concurrency Test
 
-Run the following command to simulate concurrent requests:
+Run the following command to simulate concurrent purchase requests.
 
 ```bash
 php artisan flash-sale:test
 ```
 
-Or specify the number of requests:
+Or specify the number of requests.
 
 ```bash
 php artisan flash-sale:test --requests=100
@@ -180,7 +210,7 @@ php artisan flash-sale:test --requests=100
 
 Example output:
 
-```
+```text
 Sending 100 concurrent requests...
 
 Finished
@@ -191,22 +221,19 @@ Finished
 |    5    |   95   |
 +---------+--------+
 
-Final Stock : 0
-
-PASS
 ```
 
 ---
 
 ## HTTP Status Codes
 
-| Status Code | Description        |
-| ----------- | ------------------ |
-| 200         | Success            |
-| 201         | Order Created      |
-| 404         | Product Not Found  |
-| 409         | Insufficient Stock |
-| 422         | Validation Error   |
+| Status | Description |
+|--------|-------------|
+| 200 | Success |
+| 201 | Resource Created |
+| 404 | Product Not Found |
+| 409 | Insufficient Stock |
+| 422 | Validation Error |
 
 ---
 
@@ -214,8 +241,8 @@ PASS
 
 - Business logic is separated into a dedicated Service Layer.
 - Request validation is handled using Laravel Form Requests.
-- Inventory updates are protected using transactions and pessimistic locking (`lockForUpdate()`).
-- API responses use JSON with appropriate HTTP status codes.
+- Inventory updates are protected using database transactions and pessimistic locking (`lockForUpdate()`).
+- All API responses are returned in JSON format with appropriate HTTP status codes.
 
 ---
 
