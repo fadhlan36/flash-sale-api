@@ -1,6 +1,6 @@
 # Flash Sale API
 
-A RESTful API built with Laravel 12 to simulate an online store flash sale. The application prevents overselling by handling concurrent purchase requests using database transactions and pessimistic locking (`lockForUpdate()`), ensuring inventory never becomes negative.
+A RESTful API built with **Laravel 12** to simulate an online store flash sale. The application prevents overselling by handling concurrent purchase requests using **database transactions** and **pessimistic locking (`lockForUpdate()`)**, ensuring inventory never becomes negative.
 
 ---
 
@@ -37,6 +37,10 @@ app
 │   └── Requests
 ├── Models
 └── Services
+
+database
+└── sql
+    └── flash_sale.sql
 ```
 
 ---
@@ -76,13 +80,17 @@ Generate the application key.
 php artisan key:generate
 ```
 
-Create a MySQL database (e.g. `flash_sale_api`), then import the SQL file located at:
+Create a MySQL database (e.g. `flash_sale_api`).
+
+The repository already provides a SQL file containing the complete database schema and sample product data.
+
+Import the following SQL file into your MySQL database:
 
 ```text
 database/sql/flash_sale.sql
 ```
 
-Update the database configuration in the `.env` file:
+Update your database configuration in the `.env` file:
 
 ```env
 DB_CONNECTION=mysql
@@ -103,17 +111,25 @@ php artisan serve
 
 > **Note**
 >
-> The provided SQL file already contains the required database schema and sample product data. No additional migration or seeding is required.
+> The provided SQL file (`database/sql/flash_sale.sql`) already contains the required database schema and sample product data. Therefore, **no additional migration or database seeding is required**.
+
+---
+
+## Base URL
+
+```text
+http://127.0.0.1:8000/api
+```
 
 ---
 
 ## Available Endpoints
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/products` | Retrieve all products |
-| GET | `/api/products/{id}` | Retrieve product details |
-| POST | `/api/orders` | Create a new order |
+|---------|----------|-------------|
+| GET | `/products` | Retrieve all products |
+| GET | `/products/{id}` | Retrieve product details |
+| POST | `/orders` | Create a new order |
 
 ---
 
@@ -122,7 +138,7 @@ php artisan serve
 ### Get All Products
 
 ```http
-GET /api/products
+GET /products
 ```
 
 **Response**
@@ -146,7 +162,7 @@ GET /api/products
 ### Get Product Detail
 
 ```http
-GET /api/products/1
+GET /products/1
 ```
 
 ---
@@ -154,7 +170,7 @@ GET /api/products/1
 ### Create Order
 
 ```http
-POST /api/orders
+POST /orders
 ```
 
 **Request Body**
@@ -201,19 +217,19 @@ To prevent overselling during flash sales, the checkout process uses:
 - Pessimistic locking with `lockForUpdate()`
 - Atomic inventory updates
 
-This ensures that multiple concurrent requests cannot reduce product inventory below zero.
+This approach guarantees that multiple concurrent purchase requests cannot reduce product inventory below zero.
 
 ---
 
 ## Functional Concurrency Test
 
-Run the following command to simulate concurrent purchase requests.
+Run the following command to simulate concurrent purchase requests:
 
 ```bash
 php artisan flash-sale:test
 ```
 
-Or specify the number of requests.
+Or specify the number of concurrent requests:
 
 ```bash
 php artisan flash-sale:test --requests=100
@@ -237,8 +253,8 @@ Finished
 
 ## HTTP Status Codes
 
-| Status | Description |
-|--------|-------------|
+| Status Code | Description |
+|--------------|-------------|
 | 200 | Success |
 | 201 | Resource Created |
 | 404 | Product Not Found |
@@ -253,6 +269,7 @@ Finished
 - Request validation is handled using Laravel Form Requests.
 - Inventory updates are protected using database transactions and pessimistic locking (`lockForUpdate()`).
 - All API responses are returned in JSON format with appropriate HTTP status codes.
+- The project includes a command-line concurrency test to verify inventory consistency during flash sale scenarios.
 
 ---
 
