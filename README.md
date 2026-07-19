@@ -1,6 +1,6 @@
 # Flash Sale API
 
-A RESTful API built with **Laravel 12** to simulate an online store flash sale. The application prevents overselling by handling concurrent purchase requests using **database transactions** and **pessimistic locking (`lockForUpdate()`)**, ensuring inventory never becomes negative.
+A RESTful API built with Laravel 12 to simulate an online store flash sale. The application prevents overselling by handling concurrent purchase requests using database transactions and pessimistic locking (`lockForUpdate()`), ensuring inventory never becomes negative.
 
 ---
 
@@ -76,13 +76,24 @@ Generate the application key.
 php artisan key:generate
 ```
 
-Create a MySQL database (e.g. `flash_sale`), then import the SQL file located at:
+Create a MySQL database (e.g. `flash_sale_api`), then import the SQL file located at:
 
 ```text
 database/sql/flash_sale.sql
 ```
 
-Update your database credentials in the `.env` file.
+Update the database configuration in the `.env` file:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=(your_database_name)
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+> **Note:** Replace `(your_database_name)` with the name of the database you created.
 
 Start the development server.
 
@@ -220,7 +231,6 @@ Finished
 +---------+--------+
 |    5    |   95   |
 +---------+--------+
-
 ```
 
 ---
